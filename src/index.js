@@ -95,11 +95,19 @@ app.get('/', (req, res) => {
     res.status(200).send('OK');
 });
 
+// Tangkap error fatal agar tercatat di log Alwaysdata jika terjadi masalah
+process.on('uncaughtException', (err) => {
+    console.error('[FATAL UNCAUGHT EXCEPTION]', err)
+})
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[UNHANDLED REJECTION]', reason)
+})
+
 // Port & Host binding:
 // Railway & Render menyediakan process.env.PORT
 // Alwaysdata menyediakan process.env.PORT dan process.env.IP (IPv6)
 const PORT = parseInt(process.env.PORT) || 3000
-const HOST = process.env.IP || '0.0.0.0'
+const HOST = process.env.IP || '::'
 
 app.listen(PORT, HOST, () => {
     console.log(`[Server] Running on ${HOST}:${PORT}`)
