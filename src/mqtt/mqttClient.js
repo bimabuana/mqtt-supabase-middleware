@@ -116,12 +116,13 @@ function connect() {
         console.warn('[MQTT] Client sudah terhubung. Mengabaikan pemanggilan connect() baru.')
         return
     }
-    // Buat koneksi ke HiveMQ menggunakan kredensial dari .env
+    // Buat koneksi ke HiveMQ menggunakan kredensial dari .env (Protokol MQTT 5 untuk Shared Subscription)
     client = mqtt.connect(process.env.MQTT_BROKER_URL, {
         port: parseInt(process.env.MQTT_PORT) || 8883,
         username: process.env.MQTT_USERNAME,
         password: process.env.MQTT_PASSWORD,
         protocol: 'mqtts',       // wajib TLS untuk HiveMQ Cloud (koneksi terenkripsi)
+        protocolVersion: 5,      // MQTT 5 untuk mendukung Shared Subscription ($share)
         clientId: `nodejs-backend-${Date.now()}`, // ID unik agar tidak bentrok
         clean: true,
         reconnectPeriod: 5000,   // Coba reconnect tiap 5 detik jika koneksi putus
@@ -129,11 +130,13 @@ function connect() {
 
     // Event: Berhasil terhubung ke broker
     client.on('connect', () => {
-        console.log('[MQTT] Terhubung ke HiveMQ Cloud')
-        // Mulai "dengarkan" data sensor dari ESP32
-        client.subscribe(TOPIC_SENSOR, { qos: 1 })
+        console.log('[MQTT] Terhubung ke HiveMQ Cloud (MQTT 5 Shared Subscription aktif)')
+        // Mulai "dengarkan" data sensor dari ESP32 menggunakan Shared Subscription.
+        // Dengan $share/backend_jamur/, HiveMQ Cloud hanya akan mengirimkan data sensor
+        // ke 1 instance backend saja secara bergantian (mencegah duplikasi log jika ada multi-server).
+        client.subscribe(`$share/backend_jamur/${TOPIC_SENSOR}`, { qos: 1 })
         // Mulai "dengarkan" status keaktifan perangkat (LWT)
-        client.subscribe('status/+', { qos: 1 })
+        client.subscribe('$share/backend_jamur/status/+', { qos: 1 })
     })
 
     /**
