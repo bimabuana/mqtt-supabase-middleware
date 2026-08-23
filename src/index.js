@@ -93,10 +93,12 @@ app.get('/', (req, res) => {
     res.status(200).send('OK');
 });
 
-// Railway secara otomatis menyediakan variabel PORT via environment variable.
-// Jangan hardcode port! Gunakan process.env.PORT agar server bisa berjalan di Railway.
-// Fallback ke 3000 hanya untuk development lokal.
-const PORT = process.env.PORT || 3000
-app.listen(PORT, () => {
-    console.log(`[Server] Running on port ${PORT}`)
+// Port & Host binding:
+// Railway & Render menyediakan process.env.PORT
+// Alwaysdata menyediakan process.env.PORT dan process.env.IP (IPv6)
+const PORT = parseInt(process.env.PORT) || 3000
+const HOST = process.env.IP || '0.0.0.0'
+
+app.listen(PORT, HOST, () => {
+    console.log(`[Server] Running on ${HOST}:${PORT}`)
 })
