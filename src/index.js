@@ -23,7 +23,9 @@
  * =============================================================================
  */
 
-require('dotenv').config() // Load semua variabel dari file .env ke process.env
+const path = require('path')
+require('dotenv').config({ path: path.join(__dirname, '../.env') })
+require('dotenv').config() // Fallback untuk CWD jika ada
 const express = require('express')
 const rateLimit = require('express-rate-limit')
 const { connect } = require('./mqtt/mqttClient')
