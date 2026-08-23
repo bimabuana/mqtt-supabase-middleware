@@ -24,14 +24,15 @@ export default {
     }
 
     // 2. Ambil daftar backend dari Environment Variable BACKEND_URLS di Cloudflare Dashboard
-    // Contoh format di Dashboard: "https://backend-jamur.onrender.com,https://backend-jamur.alwaysdata.net"
-    const backendEnv = env.BACKEND_URLS || "";
+    // Jika belum diset di dashboard, gunakan fallback default ke Alwaysdata
+    const DEFAULT_BACKENDS = "https://backendjta.alwaysdata.net";
+    const backendEnv = env.BACKEND_URLS || DEFAULT_BACKENDS;
     const backendList = backendEnv
       .split(",")
       .map((url) => url.trim().replace(/\/+$/, "")) // Bersihkan trailing slash
       .filter(Boolean);
 
-    // Fallback jika variabel belum diset di dashboard Cloudflare
+    // Fallback jika tidak ada backend sama sekali
     if (backendList.length === 0) {
       return jsonResponse(
         {
